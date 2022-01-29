@@ -1,0 +1,30 @@
+---
+- name: Create micromamba environment and install libraries
+  hosts: localhost
+  connection: local
+  vars:
+    - python_version: 3.9
+    - micromamba_env_name: "dev_py39"
+    - pip_install:
+        - requests==2.27.1
+        - celery==5.2.3
+        - pymongo==4.0.1
+
+  tasks:
+    - name: Remove previous environment if it exists
+      file:
+        state: absent
+        path: "{{ lookup('env','HOME') }}/micromamba/envs/{{ micromamba_env_name }}"
+
+    - name: Create micromamba environment
+      shell: "micromamba create -y -n {{ micromamba_env_name }} python={{ python_version }}"
+
+    - name: Initialize micromamba environment
+      shell: |
+        eval "$(micromamba shell hook)"
+        micromamba activate {{ micromamba_env_name }}
+        pip install {{ item }}
+      loop: "{{ pip_install }}"
+      environment:
+        PATH: "{{ lookup('env','HOME') }}/micromamba/envs/{{ micromamba_env_name }}/bin:{{ ansible_env.PATH }}" 
+

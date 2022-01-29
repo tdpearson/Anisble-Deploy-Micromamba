@@ -1,0 +1,36 @@
+---
+- name: Download and install micromamba
+  hosts: localhost
+  connection: local
+  vars:
+    - micromamba_version: 0.20.0
+    - micromamba_download_checksum: sha256:4c666210cb885565f1345febdc9e7230a970c4915f5d99b9a47a88e6e5de7f04
+
+  tasks:
+    - name: Create temporary working directory
+      file:
+        path: /tmp/micromamba
+        state: directory
+
+    - name: Download micromamba to /tmp/micromamba/
+      get_url:
+        url: "https://micro.mamba.pm/api/micromamba/linux-64/{{ micromamba_version }}"
+        dest: /tmp/micromamba/micromamba.tar.bz2
+        checksum: "{{ micromamba_download_checksum }}"
+
+    - name: Extract micromamba executable
+      unarchive:
+        src: /tmp/micromamba/micromamba.tar.bz2
+        dest: /tmp/micromamba
+
+    - name: Install micromamba executable
+      become: yes
+      copy:
+        src: /tmp/micromamba/bin/micromamba
+        dest: /usr/local/bin/micromamba
+        mode: +rx
+
+    - name: Remove temporary files
+      file:
+        state: absent
+        path: /tmp/micromamba
