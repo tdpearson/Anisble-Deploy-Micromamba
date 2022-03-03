@@ -17,7 +17,7 @@
         path: "{{ lookup('env','HOME') }}/micromamba/envs/{{ micromamba_env_name }}"
 
     - name: Create micromamba environment
-      shell: "micromamba create -y -n {{ micromamba_env_name }} python={{ python_version }}"
+      shell: "micromamba create -y -n {{ micromamba_env_name }} python={{ python_version }} -c conda-forge"
 
     - name: Initialize micromamba environment
       shell: |
